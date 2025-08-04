@@ -2,8 +2,6 @@
 
 ---
 
-### English
-
 This repository, named "study," is a personal collection of various learning materials that I have gathered during my journey as a developer. It's a bit of a mixed bag, serving as a raw, unfiltered archive of my self-learning process.
 
 You will find a wide range of content here, including:
@@ -17,8 +15,6 @@ This repository is a reflection of how I learn—by studying existing code, expe
 This repository is not a clean, structured library; it is a messy but invaluable record of my growth. Feel free to browse, but please be aware that the content is often fragmented and serves as a personal reference.
 
 ---
-
-### 中文
 
 这个名为“study”的仓库，是我个人在学习和成长过程中收集的各种学习资料的集合。它是一个有些杂乱的“百宝袋”，也是我自学过程的原始、未经过滤的档案。
 

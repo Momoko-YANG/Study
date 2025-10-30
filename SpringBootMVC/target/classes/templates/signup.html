@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#7a9fa5">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="floating">👤 Sign Up</h1>
+            <p class="subtitle">User Registration</p>
+        </header>
+        
+        <div class="add-form">
+            <form th:action="@{/signup}" method="post">
+                <input type="text" name="username" placeholder="Username" required />
+                <input type="email" name="email" placeholder="Email" required />
+                <input type="password" name="password" placeholder="Password" required />
+                <input type="password" name="confirmPassword" placeholder="Confirm Password" required />
+                <button type="submit" class="btn"><span>Create Account</span></button>
+            </form>
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <p>Already have an account? <a href="/login" class="btn" style="background: linear-gradient(45deg, #7a9fa5, #8ba9ad); display: inline-block; padding: 8px 16px; text-decoration: none;">Login here</a></p>
+            <p><a href="/" class="detail-btn" style="display: inline-block; margin-top: 10px;">Back to Home</a></p>
+        </div>
+        
+        <footer>
+            <p>© 2025 Todo App</p>
+        </footer>
+    </div>
+    
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

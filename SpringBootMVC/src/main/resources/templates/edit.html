@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Todo </title>
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#7a9fa5">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="floating">✏️ Edit Todo</h1>
+            <p class="subtitle">Edit Todo</p>
+        </header>
+        
+        <div class="card" th:if="${todo}">
+            <h2>📋 Current Todo</h2>
+            <p><strong>Title:</strong> <span th:text="${todo.title}">Todo Title</span></p>
+            <p><strong>Status:</strong> <span th:text="${todo.done} ? 'Completed' : 'Pending'">Status</span></p>
+            <p><strong>Created:</strong> <span th:text="${#temporals.format(todo.creatAt, 'yyyy-MM-dd HH:mm')}">Date</span></p>
+        </div>
+        
+        <div class="add-form">
+            <form th:action="@{/todos/{id}/edit(id=${todo.id})}" method="post" th:object="${todoForm}">
+                <input type="text" name="title" th:field="*{title}" placeholder="Enter new title..." />
+                <button type="submit" class="btn"><span>Update Todo</span></button>
+                <div th:if="${#fields.hasErrors('title')}" class="error-message">
+                    <span th:errors="*{title}">Error message</span>
+                </div>
+            </form>
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="/todos" class="btn" style="background: linear-gradient(45deg, #d4a574, #e0b87a);">Cancel</a>
+        </div>
+        
+        <footer>
+            <p>© 2025 Todo App</p>
+        </footer>
+    </div>
+    
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

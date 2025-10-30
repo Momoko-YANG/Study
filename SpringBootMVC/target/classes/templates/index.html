@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App </title>
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#7a9fa5">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="floating">📝 Todo App</h1>
+            <p class="subtitle">Todo App</p>
+        </header>
+        
+        <div class="card-grid">
+            <div class="card">
+                <h2>📋 Todo List</h2>
+                <p>View and manage all your tasks with our beautiful interface</p>
+                <a href="/todos" class="btn"><span>Get Started</span></a>
+            </div>
+            
+            <div class="card">
+                <h2>🔐 Login</h2>
+                <p>Sign in to your account and access your personal todos</p>
+                <a href="/login" class="btn"><span>Login</span></a>
+            </div>
+            
+            <div class="card">
+                <h2>👤 Sign Up</h2>
+                <p>Create a new account and start organizing your life</p>
+                <a href="/signup" class="btn"><span>Sign Up</span></a>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2025 Todo App</p>
+        </footer>
+    </div>
+    
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

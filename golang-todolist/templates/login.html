@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="登录到 Go Todo 应用">
+    
+    <!-- PWA 相关 -->
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#667eea">
+    
+    <title>登录 - Go Todo 应用</title>
+    
+    <!-- 样式 -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <style>
+        .login-container {
+            max-width: 400px;
+            margin: 50px auto;
+        }
+        
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .login-header {
+            margin-bottom: 30px;
+        }
+        
+        .login-header h1 {
+            color: #4a5568;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .login-header p {
+            color: #718096;
+            font-size: 1.1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .login-btn:active {
+            transform: translateY(0);
+        }
+        
+        .login-links {
+            margin-top: 20px;
+        }
+        
+        .login-links a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .login-links a:hover {
+            color: #764ba2;
+        }
+        
+        .demo-info {
+            background: rgba(72, 187, 120, 0.1);
+            border: 1px solid rgba(72, 187, 120, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        
+        .demo-info h4 {
+            color: #38a169;
+            margin-bottom: 10px;
+        }
+        
+        .demo-info p {
+            color: #2d3748;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .error-message {
+            background: rgba(245, 101, 101, 0.1);
+            color: #e53e3e;
+            border: 1px solid rgba(245, 101, 101, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="login-container">
+            <div class="login-card">
+                <!-- 登录头部 -->
+                <div class="login-header">
+                    <h1>🔐 登录</h1>
+                    <p>欢迎回到 Go Todo 应用</p>
+                </div>
+
+                <!-- 登录表单 -->
+                <form method="POST" action="/login" id="loginForm">
+                    <div class="form-group">
+                        <label for="username">用户名</label>
+                        <input 
+                            type="text" 
+                            id="username" 
+                            name="username" 
+                            class="form-control" 
+                            placeholder="请输入用户名"
+                            required
+                            autocomplete="username"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">密码</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            class="form-control" 
+                            placeholder="请输入密码"
+                            required
+                            autocomplete="current-password"
+                        >
+                    </div>
+
+                    <button type="submit" class="login-btn">
+                        🚀 登录
+                    </button>
+                </form>
+
+                <!-- 登录链接 -->
+                <div class="login-links">
+                    <p>还没有账户？ <a href="/signup">立即注册</a></p>
+                    <p><a href="/">← 返回首页</a></p>
+                </div>
+
+                <!-- 演示账户信息 -->
+                <div class="demo-info">
+                    <h4>🎯 演示账户</h4>
+                    <p><strong>用户名：</strong> admin</p>
+                    <p><strong>密码：</strong> password</p>
+                    <p style="margin-top: 10px; font-size: 0.8rem; color: #718096;">
+                        点击上方按钮快速填入演示账户信息
+                    </p>
+                    <button type="button" onclick="fillDemoAccount()" class="btn btn-secondary" style="margin-top: 10px; padding: 8px 16px; font-size: 0.9rem;">
+                        使用演示账户
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载指示器 -->
+    <div id="loading" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000;">
+        <div class="loading"></div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="/static/js/app.js"></script>
+    
+    <!-- 页面特定脚本 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('登录页面已加载');
+            
+            // 表单验证
+            const form = document.getElementById('loginForm');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            
+            form.addEventListener('submit', function(e) {
+                const username = usernameInput.value.trim();
+                const password = passwordInput.value.trim();
+                
+                if (!username) {
+                    e.preventDefault();
+                    showError('请输入用户名');
+                    usernameInput.focus();
+                    return;
+                }
+                
+                if (!password) {
+                    e.preventDefault();
+                    showError('请输入密码');
+                    passwordInput.focus();
+                    return;
+                }
+                
+                // 显示加载状态
+                showLoading(true);
+            });
+            
+            // 输入框焦点效果
+            const inputs = document.querySelectorAll('.form-control');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.style.transform = 'translateY(-2px)';
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.parentElement.style.transform = 'translateY(0)';
+                });
+            });
+            
+            // 添加键盘快捷键
+            document.addEventListener('keydown', function(e) {
+                // Enter: 提交表单
+                if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                    e.preventDefault();
+                    form.submit();
+                }
+                
+                // Escape: 返回首页
+                if (e.key === 'Escape') {
+                    window.location.href = '/';
+                }
+            });
+            
+            // 自动聚焦到用户名输入框
+            usernameInput.focus();
+        });
+
+        // 填入演示账户信息
+        function fillDemoAccount() {
+            document.getElementById('username').value = 'admin';
+            document.getElementById('password').value = 'password';
+            
+            // 添加视觉反馈
+            const inputs = document.querySelectorAll('.form-control');
+            inputs.forEach(input => {
+                input.style.borderColor = '#48bb78';
+                input.style.backgroundColor = 'rgba(72, 187, 120, 0.1)';
+                
+                setTimeout(() => {
+                    input.style.borderColor = '';
+                    input.style.backgroundColor = '';
+                }, 1000);
+            });
+            
+            showAlert('演示账户信息已填入', 'success');
+        }
+
+        // 显示错误消息
+        function showError(message) {
+            // 移除现有错误消息
+            const existingError = document.querySelector('.error-message');
+            if (existingError) {
+                existingError.remove();
+            }
+            
+            // 创建新错误消息
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = message;
+            
+            // 插入到表单前
+            const form = document.getElementById('loginForm');
+            form.insertBefore(errorDiv, form.firstChild);
+            
+            // 3秒后自动移除
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 3000);
+        }
+
+        // 显示提示消息
+        function showAlert(message, type = 'info') {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            alert.style.position = 'fixed';
+            alert.style.top = '20px';
+            alert.style.right = '20px';
+            alert.style.zIndex = '1000';
+            alert.style.minWidth = '200px';
+            
+            document.body.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 3000);
+        }
+
+        // 显示加载状态
+        function showLoading(show) {
+            const loadingElement = document.getElementById('loading');
+            if (loadingElement) {
+                loadingElement.style.display = show ? 'block' : 'none';
+            }
+        }
+
+        // 页面可见性变化时的处理
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                // 页面变为可见时，检查是否有未保存的输入
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                if (username || password) {
+                    console.log('检测到未完成的登录表单');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

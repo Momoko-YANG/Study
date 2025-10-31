@@ -1,0 +1,6 @@
+github.com/gorilla/mux v1.8.1 h1:Tu3xOu2z0q6W5NyWSz8A3y1Eu2qws8A+r/vhyKP2xTw=
+github.com/gorilla/mux v1.8.1/go.mod h1:DVbg23sWSpFRCP0SfiEN6jmj59UnW/n46BH5rLB71So=
+github.com/gorilla/securecookie v1.1.2 h1:Miw4tHjd96s5h0cvf6iqv+cfrXJbMMczA7on8wLd0FY=
+github.com/gorilla/securecookie v1.1.2/go.mod h1:ra0sb63/xPlUeL+yeTHcijOSYxLW0VdZLYUk9mQLXao=
+github.com/gorilla/sessions v1.2.2 h1:DHuaSAb3n7c0lq79Eqr05SAQHcQBF6XkKX4D5MjA+WM=
+github.com/gorilla/sessions v1.2.2/go.mod h1:dk2EvrK2aVXbG7qL8l3wi3aXz0p3Zv3Q3Q3Q3Q3Q3Q3Q=

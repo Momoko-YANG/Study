@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="编辑任务">
+    
+    <!-- PWA 相关 -->
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#667eea">
+    
+    <title>编辑任务 - {{.Title}}</title>
+    
+    <!-- 样式 -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <header class="header">
+            <h1>✏️ 编辑任务</h1>
+            <p>修改任务信息</p>
+            
+            <!-- 导航 -->
+            <nav class="nav">
+                <a href="/todos/{{.ID}}">← 返回详情</a>
+                <a href="/todos">任务列表</a>
+            </nav>
+        </header>
+
+        <!-- 编辑表单 -->
+        <div class="card">
+            <form id="editForm" method="POST" action="/todos/{{.ID}}/edit" data-todo-id="{{.ID}}">
+                <div class="form-group">
+                    <label for="title">任务标题 *</label>
+                    <input 
+                        type="text" 
+                        id="title" 
+                        name="title" 
+                        class="form-control" 
+                        value="{{.Title}}" 
+                        placeholder="请输入任务标题"
+                        required
+                        maxlength="100"
+                    >
+                    <small style="color: #a0aec0; font-size: 0.9rem;">最多100个字符</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">任务描述</label>
+                    <textarea 
+                        id="description" 
+                        name="description" 
+                        class="form-control" 
+                        placeholder="请输入任务描述（可选）"
+                        rows="4"
+                        maxlength="500"
+                    >{{.Description}}</textarea>
+                    <small style="color: #a0aec0; font-size: 0.9rem;">最多500个字符</small>
+                </div>
+
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input 
+                            type="checkbox" 
+                            id="completed" 
+                            name="completed" 
+                            class="todo-checkbox"
+                            {{if .Completed}}checked{{end}}
+                        >
+                        <label for="completed">标记为已完成</label>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 30px;">
+                    <button type="submit" class="btn btn-primary">
+                        💾 保存更改
+                    </button>
+                    
+                    <a href="/todos/{{.ID}}" class="btn btn-secondary">
+                        ❌ 取消
+                    </a>
+                    
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                        🔄 重置
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 任务预览 -->
+        <div class="card">
+            <h3>预览</h3>
+            <div id="taskPreview" style="background: rgba(102, 126, 234, 0.05); padding: 20px; border-radius: 10px; border-left: 4px solid #667eea;">
+                <div id="previewTitle" style="font-size: 1.2rem; font-weight: 600; color: #2d3748; margin-bottom: 8px;">
+                    {{.Title}}
+                </div>
+                <div id="previewDescription" style="color: #718096; margin-bottom: 15px; line-height: 1.5;">
+                    {{if .Description}}{{.Description}}{{else}}<em style="color: #a0aec0;">暂无描述</em>{{end}}
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span id="previewStatus" class="status-badge {{if .Completed}}status-completed{{else}}status-pending{{end}}">
+                        {{if .Completed}}✅ 已完成{{else}}⏳ 进行中{{end}}
+                    </span>
+                    <span style="color: #a0aec0; font-size: 0.9rem;">
+                        最后更新: {{.UpdatedAt.Format "2006-01-02 15:04"}}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 快速操作 -->
+        <div class="card">
+            <h3>快速操作</h3>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 15px;">
+                <button onclick="duplicateTask()" class="btn btn-secondary">
+                    📋 复制任务
+                </button>
+                
+                <button onclick="clearDescription()" class="btn btn-secondary">
+                    🗑️ 清空描述
+                </button>
+                
+                <button onclick="toggleComplete()" class="btn {{if .Completed}}btn-secondary{{else}}btn-success{{end}}">
+                    {{if .Completed}}⏳ 标记为进行中{{else}}✅ 标记为完成{{end}}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载指示器 -->
+    <div id="loading" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000;">
+        <div class="loading"></div>
+    </div>
+
+    <!-- 原始数据（以 JSON 形式嵌入，避免内联 JS 解析问题） -->
+    <script id="originalDataJSON" type="application/json">{"title": {{printf "%q" .Title}}, "description": {{printf "%q" .Description}}, "completed": {{.Completed}}}</script>
+
+    <!-- JavaScript -->
+    <script src="/static/js/app.js"></script>
+    
+    <!-- 页面特定脚本 -->
+    <script>
+        // 原始数据
+        const originalData = JSON.parse(document.getElementById('originalDataJSON').textContent);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('编辑任务页面已加载');
+            
+            // 绑定输入事件来更新预览
+            const titleInput = document.getElementById('title');
+            const descriptionInput = document.getElementById('description');
+            const completedCheckbox = document.getElementById('completed');
+            
+            titleInput.addEventListener('input', updatePreview);
+            descriptionInput.addEventListener('input', updatePreview);
+            completedCheckbox.addEventListener('change', updatePreview);
+            
+            // 添加键盘快捷键
+            document.addEventListener('keydown', function(e) {
+                // Ctrl/Cmd + S: 保存
+                if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                    e.preventDefault();
+                    document.getElementById('editForm').submit();
+                }
+                
+                // Ctrl/Cmd + Z: 重置
+                if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+                    e.preventDefault();
+                    resetForm();
+                }
+                
+                // Escape: 取消
+                if (e.key === 'Escape') {
+                    if (confirm('确定要取消编辑吗？未保存的更改将丢失。')) {
+                        window.location.href = '/todos/{{.ID}}';
+                    }
+                }
+            });
+            
+            // 表单验证
+            const form = document.getElementById('editForm');
+            form.addEventListener('submit', function(e) {
+                const title = titleInput.value.trim();
+                if (!title) {
+                    e.preventDefault();
+                    showAlert('请输入任务标题', 'error');
+                    titleInput.focus();
+                    return;
+                }
+                
+                if (title.length > 100) {
+                    e.preventDefault();
+                    showAlert('任务标题不能超过100个字符', 'error');
+                    titleInput.focus();
+                    return;
+                }
+                
+                const description = descriptionInput.value.trim();
+                if (description.length > 500) {
+                    e.preventDefault();
+                    showAlert('任务描述不能超过500个字符', 'error');
+                    descriptionInput.focus();
+                    return;
+                }
+                
+                // 显示保存提示
+                showAlert('正在保存...', 'info');
+            });
+        });
+
+        // 更新预览
+        function updatePreview() {
+            const title = document.getElementById('title').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const completed = document.getElementById('completed').checked;
+            
+            // 更新标题
+            const previewTitle = document.getElementById('previewTitle');
+            previewTitle.textContent = title || '未命名任务';
+            
+            // 更新描述
+            const previewDescription = document.getElementById('previewDescription');
+            if (description) {
+                previewDescription.textContent = description;
+                previewDescription.style.color = '#718096';
+            } else {
+                previewDescription.innerHTML = '<em style="color: #a0aec0;">暂无描述</em>';
+            }
+            
+            // 更新状态
+            const previewStatus = document.getElementById('previewStatus');
+            if (completed) {
+                previewStatus.textContent = '✅ 已完成';
+                previewStatus.className = 'status-badge status-completed';
+            } else {
+                previewStatus.textContent = '⏳ 进行中';
+                previewStatus.className = 'status-badge status-pending';
+            }
+        }
+
+        // 重置表单
+        function resetForm() {
+            if (confirm('确定要重置表单吗？所有更改将丢失。')) {
+                document.getElementById('title').value = originalData.title;
+                document.getElementById('description').value = originalData.description;
+                document.getElementById('completed').checked = originalData.completed;
+                updatePreview();
+                showAlert('表单已重置', 'info');
+            }
+        }
+
+        // 复制任务
+        function duplicateTask() {
+            const title = document.getElementById('title').value.trim();
+            const description = document.getElementById('description').value.trim();
+            
+            if (!title) {
+                showAlert('请先输入任务标题', 'error');
+                return;
+            }
+            
+            // 创建新任务表单
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/todos/new';
+            
+            const titleInput = document.createElement('input');
+            titleInput.type = 'hidden';
+            titleInput.name = 'title';
+            titleInput.value = title + ' (副本)';
+            
+            const descriptionInput = document.createElement('input');
+            descriptionInput.type = 'hidden';
+            descriptionInput.name = 'description';
+            descriptionInput.value = description;
+            
+            form.appendChild(titleInput);
+            form.appendChild(descriptionInput);
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        // 清空描述
+        function clearDescription() {
+            if (confirm('确定要清空任务描述吗？')) {
+                document.getElementById('description').value = '';
+                updatePreview();
+                showAlert('描述已清空', 'info');
+            }
+        }
+
+        // 切换完成状态
+        function toggleComplete() {
+            const checkbox = document.getElementById('completed');
+            checkbox.checked = !checkbox.checked;
+            updatePreview();
+            showAlert(checkbox.checked ? '已标记为完成' : '已标记为进行中', 'info');
+        }
+
+        // 显示提示消息
+        function showAlert(message, type = 'info') {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            alert.style.position = 'fixed';
+            alert.style.top = '20px';
+            alert.style.right = '20px';
+            alert.style.zIndex = '1000';
+            alert.style.minWidth = '200px';
+            
+            document.body.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 3000);
+        }
+
+        // 页面离开前确认
+        window.addEventListener('beforeunload', function(e) {
+            const title = document.getElementById('title').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const completed = document.getElementById('completed').checked;
+            
+            const hasChanges = 
+                title !== originalData.title ||
+                description !== originalData.description ||
+                completed !== originalData.completed;
+            
+            if (hasChanges) {
+                e.preventDefault();
+                e.returnValue = '您有未保存的更改，确定要离开吗？';
+                return e.returnValue;
+            }
+        });
+    </script>
+</body>
+</html>

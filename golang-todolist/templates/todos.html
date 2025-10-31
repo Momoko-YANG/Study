@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="管理您的所有待办事项">
+    
+    <!-- PWA 相关 -->
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#667eea">
+    
+    <title>我的任务 - Go Todo 应用</title>
+    
+    <!-- 样式 -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <header class="header">
+            <h1>📋 我的任务</h1>
+            <p>管理您的所有待办事项</p>
+            
+            <!-- 导航 -->
+            <nav class="nav">
+                <a href="/">首页</a>
+                <a href="/logout">登出</a>
+            </nav>
+        </header>
+
+        <!-- 工具栏 -->
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <!-- 搜索框 -->
+                <div style="flex: 1; min-width: 200px;">
+                    <input type="text" id="searchInput" placeholder="搜索任务..." class="form-control" style="margin: 0;">
+                </div>
+                
+                <!-- 筛选器 -->
+                <div>
+                    <select id="filterSelect" class="form-control" style="width: auto; margin: 0;">
+                        <option value="all">所有任务</option>
+                        <option value="pending">进行中</option>
+                        <option value="completed">已完成</option>
+                    </select>
+                </div>
+                
+                <!-- 新建按钮 -->
+                <div>
+                    <a href="/todos/new" class="btn btn-primary">+ 新建任务</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 任务列表 -->
+        <div class="card">
+            <div id="todoList" class="todo-list">
+                {{range .Todos}}
+                <div class="todo-item {{if .Completed}}completed{{end}} fade-in">
+                    <div class="todo-title">{{.Title}}</div>
+                    <div class="todo-description">{{.Description}}</div>
+                    <div class="todo-meta">
+                        <span class="status-badge {{if .Completed}}status-completed{{else}}status-pending{{end}}">
+                            {{if .Completed}}已完成{{else}}进行中{{end}}
+                        </span>
+                        <span>{{.CreatedAt.Format "2006-01-02 15:04"}}</span>
+                    </div>
+                    <div class="todo-actions">
+                        <a href="/todos/{{.ID}}" class="btn btn-secondary">查看</a>
+                        <a href="/todos/{{.ID}}/edit" class="btn btn-primary">编辑</a>
+                        <form method="POST" action="/todos/{{.ID}}/delete" style="display: inline;">
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('确定要删除这个任务吗？')">删除</button>
+                        </form>
+                    </div>
+                </div>
+                {{else}}
+                <div class="empty-state">
+                    <h3>暂无任务</h3>
+                    <p>点击"新建任务"按钮开始创建您的第一个任务</p>
+                    <a href="/todos/new" class="btn btn-primary" style="margin-top: 15px;">创建第一个任务</a>
+                </div>
+                {{end}}
+            </div>
+        </div>
+
+        <!-- 统计信息 -->
+        <div class="card">
+            <h3>任务统计</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; margin-top: 15px;">
+                <div style="text-align: center; padding: 15px; background: rgba(102, 126, 234, 0.1); border-radius: 10px;">
+                    <div style="font-size: 2rem; font-weight: bold; color: #667eea;">{{len .Todos}}</div>
+                    <div>总任务数</div>
+                </div>
+                <div style="text-align: center; padding: 15px; background: rgba(255, 193, 7, 0.1); border-radius: 10px;">
+                    <div style="font-size: 2rem; font-weight: bold; color: #d69e2e;">
+                        {{$pending := 0}}{{range .Todos}}{{if not .Completed}}{{$pending = add $pending 1}}{{end}}{{end}}{{$pending}}
+                    </div>
+                    <div>进行中</div>
+                </div>
+                <div style="text-align: center; padding: 15px; background: rgba(72, 187, 120, 0.1); border-radius: 10px;">
+                    <div style="font-size: 2rem; font-weight: bold; color: #38a169;">
+                        {{$completed := 0}}{{range .Todos}}{{if .Completed}}{{$completed = add $completed 1}}{{end}}{{end}}{{$completed}}
+                    </div>
+                    <div>已完成</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载指示器 -->
+    <div id="loading" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000;">
+        <div class="loading"></div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="/static/js/app.js"></script>
+    
+    <!-- 页面特定脚本 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('任务列表页面已加载');
+            
+            // 添加键盘快捷键
+            document.addEventListener('keydown', function(e) {
+                // Ctrl/Cmd + N: 新建任务
+                if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+                    e.preventDefault();
+                    window.location.href = '/todos/new';
+                }
+                
+                // Ctrl/Cmd + F: 搜索
+                if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                    e.preventDefault();
+                    const searchInput = document.getElementById('searchInput');
+                    if (searchInput) {
+                        searchInput.focus();
+                    }
+                }
+            });
+            
+            // 添加任务项悬停效果
+            const todoItems = document.querySelectorAll('.todo-item');
+            todoItems.forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-3px)';
+                });
+                
+                item.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

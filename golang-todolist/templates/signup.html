@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="注册 Go Todo 应用账户">
+    
+    <!-- PWA 相关 -->
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#667eea">
+    
+    <title>注册 - Go Todo 应用</title>
+    
+    <!-- 样式 -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <style>
+        .signup-container {
+            max-width: 450px;
+            margin: 30px auto;
+        }
+        
+        .signup-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .signup-header {
+            margin-bottom: 30px;
+        }
+        
+        .signup-header h1 {
+            color: #4a5568;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .signup-header p {
+            color: #718096;
+            font-size: 1.1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .form-control.error {
+            border-color: #e53e3e;
+            background-color: rgba(245, 101, 101, 0.05);
+        }
+        
+        .form-control.success {
+            border-color: #48bb78;
+            background-color: rgba(72, 187, 120, 0.05);
+        }
+        
+        .signup-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        
+        .signup-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .signup-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .signup-links {
+            margin-top: 20px;
+        }
+        
+        .signup-links a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .signup-links a:hover {
+            color: #764ba2;
+        }
+        
+        .password-strength {
+            margin-top: 5px;
+            font-size: 0.8rem;
+        }
+        
+        .strength-weak { color: #e53e3e; }
+        .strength-medium { color: #d69e2e; }
+        .strength-strong { color: #48bb78; }
+        
+        .form-help {
+            font-size: 0.8rem;
+            color: #a0aec0;
+            margin-top: 5px;
+        }
+        
+        .error-message {
+            background: rgba(245, 101, 101, 0.1);
+            color: #e53e3e;
+            border: 1px solid rgba(245, 101, 101, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .success-message {
+            background: rgba(72, 187, 120, 0.1);
+            color: #38a169;
+            border: 1px solid rgba(72, 187, 120, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .password-requirements {
+            background: rgba(102, 126, 234, 0.05);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+            font-size: 0.8rem;
+            text-align: left;
+        }
+        
+        .password-requirements h4 {
+            color: #4a5568;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .password-requirements ul {
+            margin: 0;
+            padding-left: 15px;
+            color: #718096;
+        }
+        
+        .password-requirements li {
+            margin-bottom: 3px;
+        }
+        
+        .password-requirements li.valid {
+            color: #48bb78;
+        }
+        
+        .password-requirements li.invalid {
+            color: #e53e3e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="signup-container">
+            <div class="signup-card">
+                <!-- 注册头部 -->
+                <div class="signup-header">
+                    <h1>🎉 注册</h1>
+                    <p>创建您的 Go Todo 应用账户</p>
+                </div>
+
+                <!-- 注册表单 -->
+                <form method="POST" action="/signup" id="signupForm">
+                    <div class="form-group">
+                        <label for="username">用户名 *</label>
+                        <input 
+                            type="text" 
+                            id="username" 
+                            name="username" 
+                            class="form-control" 
+                            placeholder="请输入用户名"
+                            required
+                            minlength="3"
+                            maxlength="20"
+                            pattern="[a-zA-Z0-9_]+"
+                            autocomplete="username"
+                        >
+                        <div class="form-help">3-20个字符，只能包含字母、数字和下划线</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">邮箱地址 *</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            class="form-control" 
+                            placeholder="请输入邮箱地址"
+                            required
+                            autocomplete="email"
+                        >
+                        <div class="form-help">用于账户验证和密码重置</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">密码 *</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            class="form-control" 
+                            placeholder="请输入密码"
+                            required
+                            minlength="6"
+                            autocomplete="new-password"
+                        >
+                        <div id="passwordStrength" class="password-strength"></div>
+                        
+                        <!-- 密码要求 -->
+                        <div class="password-requirements">
+                            <h4>密码要求：</h4>
+                            <ul>
+                                <li id="req-length">至少6个字符</li>
+                                <li id="req-uppercase">包含大写字母</li>
+                                <li id="req-lowercase">包含小写字母</li>
+                                <li id="req-number">包含数字</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword">确认密码 *</label>
+                        <input 
+                            type="password" 
+                            id="confirmPassword" 
+                            class="form-control" 
+                            placeholder="请再次输入密码"
+                            required
+                            autocomplete="new-password"
+                        >
+                        <div id="passwordMatch" class="form-help"></div>
+                    </div>
+
+                    <button type="submit" class="signup-btn" id="signupBtn">
+                        🚀 创建账户
+                    </button>
+                </form>
+
+                <!-- 注册链接 -->
+                <div class="signup-links">
+                    <p>已有账户？ <a href="/login">立即登录</a></p>
+                    <p><a href="/">← 返回首页</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载指示器 -->
+    <div id="loading" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000;">
+        <div class="loading"></div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="/static/js/app.js"></script>
+    
+    <!-- 页面特定脚本 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('注册页面已加载');
+            
+            // 表单元素
+            const form = document.getElementById('signupForm');
+            const usernameInput = document.getElementById('username');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            const signupBtn = document.getElementById('signupBtn');
+            
+            // 密码强度检查
+            passwordInput.addEventListener('input', function() {
+                checkPasswordStrength(this.value);
+                checkPasswordMatch();
+            });
+            
+            // 确认密码检查
+            confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+            
+            // 用户名验证
+            usernameInput.addEventListener('input', function() {
+                validateUsername(this.value);
+            });
+            
+            // 邮箱验证
+            emailInput.addEventListener('input', function() {
+                validateEmail(this.value);
+            });
+            
+            // 表单提交
+            form.addEventListener('submit', function(e) {
+                if (!validateForm()) {
+                    e.preventDefault();
+                    return;
+                }
+                
+                // 显示加载状态
+                showLoading(true);
+                signupBtn.disabled = true;
+                signupBtn.textContent = '创建中...';
+            });
+            
+            // 添加键盘快捷键
+            document.addEventListener('keydown', function(e) {
+                // Enter: 提交表单
+                if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                    e.preventDefault();
+                    form.submit();
+                }
+                
+                // Escape: 返回首页
+                if (e.key === 'Escape') {
+                    window.location.href = '/';
+                }
+            });
+            
+            // 自动聚焦到用户名输入框
+            usernameInput.focus();
+        });
+
+        // 检查密码强度
+        function checkPasswordStrength(password) {
+            const strengthDiv = document.getElementById('passwordStrength');
+            const requirements = {
+                length: document.getElementById('req-length'),
+                uppercase: document.getElementById('req-uppercase'),
+                lowercase: document.getElementById('req-lowercase'),
+                number: document.getElementById('req-number')
+            };
+            
+            let score = 0;
+            let strength = '';
+            
+            // 检查长度
+            if (password.length >= 6) {
+                score++;
+                requirements.length.classList.add('valid');
+                requirements.length.classList.remove('invalid');
+            } else {
+                requirements.length.classList.add('invalid');
+                requirements.length.classList.remove('valid');
+            }
+            
+            // 检查大写字母
+            if (/[A-Z]/.test(password)) {
+                score++;
+                requirements.uppercase.classList.add('valid');
+                requirements.uppercase.classList.remove('invalid');
+            } else {
+                requirements.uppercase.classList.add('invalid');
+                requirements.uppercase.classList.remove('valid');
+            }
+            
+            // 检查小写字母
+            if (/[a-z]/.test(password)) {
+                score++;
+                requirements.lowercase.classList.add('valid');
+                requirements.lowercase.classList.remove('invalid');
+            } else {
+                requirements.lowercase.classList.add('invalid');
+                requirements.lowercase.classList.remove('valid');
+            }
+            
+            // 检查数字
+            if (/\d/.test(password)) {
+                score++;
+                requirements.number.classList.add('valid');
+                requirements.number.classList.remove('invalid');
+            } else {
+                requirements.number.classList.add('invalid');
+                requirements.number.classList.remove('valid');
+            }
+            
+            // 确定强度
+            if (score < 2) {
+                strength = '弱';
+                strengthDiv.className = 'password-strength strength-weak';
+            } else if (score < 4) {
+                strength = '中等';
+                strengthDiv.className = 'password-strength strength-medium';
+            } else {
+                strength = '强';
+                strengthDiv.className = 'password-strength strength-strong';
+            }
+            
+            strengthDiv.textContent = password ? `密码强度: ${strength}` : '';
+        }
+
+        // 检查密码匹配
+        function checkPasswordMatch() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const matchDiv = document.getElementById('passwordMatch');
+            
+            if (confirmPassword) {
+                if (password === confirmPassword) {
+                    matchDiv.textContent = '✅ 密码匹配';
+                    matchDiv.style.color = '#48bb78';
+                    document.getElementById('confirmPassword').classList.add('success');
+                    document.getElementById('confirmPassword').classList.remove('error');
+                } else {
+                    matchDiv.textContent = '❌ 密码不匹配';
+                    matchDiv.style.color = '#e53e3e';
+                    document.getElementById('confirmPassword').classList.add('error');
+                    document.getElementById('confirmPassword').classList.remove('success');
+                }
+            } else {
+                matchDiv.textContent = '';
+                document.getElementById('confirmPassword').classList.remove('error', 'success');
+            }
+        }
+
+        // 验证用户名
+        function validateUsername(username) {
+            const input = document.getElementById('username');
+            const pattern = /^[a-zA-Z0-9_]{3,20}$/;
+            
+            if (username && !pattern.test(username)) {
+                input.classList.add('error');
+                input.classList.remove('success');
+            } else if (username && pattern.test(username)) {
+                input.classList.add('success');
+                input.classList.remove('error');
+            } else {
+                input.classList.remove('error', 'success');
+            }
+        }
+
+        // 验证邮箱
+        function validateEmail(email) {
+            const input = document.getElementById('email');
+            const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (email && !pattern.test(email)) {
+                input.classList.add('error');
+                input.classList.remove('success');
+            } else if (email && pattern.test(email)) {
+                input.classList.add('success');
+                input.classList.remove('error');
+            } else {
+                input.classList.remove('error', 'success');
+            }
+        }
+
+        // 验证整个表单
+        function validateForm() {
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // 检查用户名
+            if (!username) {
+                showError('请输入用户名');
+                document.getElementById('username').focus();
+                return false;
+            }
+            
+            if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+                showError('用户名格式不正确');
+                document.getElementById('username').focus();
+                return false;
+            }
+            
+            // 检查邮箱
+            if (!email) {
+                showError('请输入邮箱地址');
+                document.getElementById('email').focus();
+                return false;
+            }
+            
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                showError('邮箱格式不正确');
+                document.getElementById('email').focus();
+                return false;
+            }
+            
+            // 检查密码
+            if (!password) {
+                showError('请输入密码');
+                document.getElementById('password').focus();
+                return false;
+            }
+            
+            if (password.length < 6) {
+                showError('密码至少需要6个字符');
+                document.getElementById('password').focus();
+                return false;
+            }
+            
+            // 检查密码匹配
+            if (password !== confirmPassword) {
+                showError('两次输入的密码不一致');
+                document.getElementById('confirmPassword').focus();
+                return false;
+            }
+            
+            return true;
+        }
+
+        // 显示错误消息
+        function showError(message) {
+            // 移除现有消息
+            const existingError = document.querySelector('.error-message');
+            const existingSuccess = document.querySelector('.success-message');
+            if (existingError) existingError.remove();
+            if (existingSuccess) existingSuccess.remove();
+            
+            // 创建新错误消息
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = message;
+            
+            // 插入到表单前
+            const form = document.getElementById('signupForm');
+            form.insertBefore(errorDiv, form.firstChild);
+            
+            // 3秒后自动移除
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
+        }
+
+        // 显示成功消息
+        function showSuccess(message) {
+            // 移除现有消息
+            const existingError = document.querySelector('.error-message');
+            const existingSuccess = document.querySelector('.success-message');
+            if (existingError) existingError.remove();
+            if (existingSuccess) existingSuccess.remove();
+            
+            // 创建新成功消息
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-message';
+            successDiv.textContent = message;
+            
+            // 插入到表单前
+            const form = document.getElementById('signupForm');
+            form.insertBefore(successDiv, form.firstChild);
+            
+            // 3秒后自动移除
+            setTimeout(() => {
+                successDiv.remove();
+            }, 5000);
+        }
+
+        // 显示加载状态
+        function showLoading(show) {
+            const loadingElement = document.getElementById('loading');
+            if (loadingElement) {
+                loadingElement.style.display = show ? 'block' : 'none';
+            }
+        }
+    </script>
+</body>
+</html>
